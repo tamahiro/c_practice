@@ -1,3 +1,35 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
+
+static void log_exit(char *fmt,...);
+static void xalloc(size_t sz);
+static void install_signal_handlers(void);
+static void signal_exit(int sig);
+static void service(FILE *in, FILE *out, char *docroot);
+
+int main(int argc, char *argv[])
+{
+  if (argc < 2) {
+    fprintf(stderr, "Usage: %s <docroot>\n", argv[0]);
+    exit(1);
+  }
+  install_signal_handlers();
+  service(stdin, stdout, argv[1]);
+  exit(0);
+}
+
+static void service(FILE *in, FILE *out, char *docroot)
+{
+  struct HTTPRequest *req;
+
+  req = read_request(in);
+  respond_to(req, out, docroot);
+  free_request(req);
+}
+
 static void log_exit(char *fmt, ...)
 {
   va_list ap;
